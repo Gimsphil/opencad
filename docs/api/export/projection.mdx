@@ -1,0 +1,179 @@
+---
+title: Projection & hidden line removal (experimental)
+description: Project 3D B-Rep geometry to 2D JSON with optional hidden line removal
+---
+
+## Overview
+
+OpenGeometry can project stored scene geometry to 2D vector data with optional hidden line
+removal. In the public Three.js workflow, you usually:
+
+1. Create wrapper geometry such as `Cuboid`, `Polygon`, `Solid`, or boolean results.
+2. Add those B-Rep payloads to `OGSceneManager`.
+3. Call one of the projection helpers to get 2D JSON output.
+
+<Warning>
+Projection and hidden line removal are experimental. Output and option shapes may change. If you
+hit a limitation or confusing output, reach out on
+[Discord](https://discord.gg/9wJpbfgGGA).
+</Warning>
+
+## Initialization
+
+```ts
+import { OpenGeometry } from "opengeometry";
+
+await OpenGeometry.create({ wasmURL: "/opengeometry_bg.wasm" });
+```
+
+## Projection APIs
+
+### projectTo2DCamera()
+
+Projects a stored scene to a `Scene2D` JSON payload.
+
+```ts
+const scene2dJson = manager.projectTo2DCamera(sceneId, cameraJson, hlrJson);
+const scene2d = JSON.parse(scene2dJson);
+```
+
+### Pretty-print variants
+
+Use these when you want formatted JSON for inspection or saved fixtures:
+
+- `projectTo2DCameraPretty(sceneId, cameraJson, hlrJson?)`
+- `projectTo2DLinesPretty(sceneId, cameraJson, hlrJson?)`
+
+### Line-flattened variants
+
+Use these when you want a flat segment list instead of grouped paths:
+
+- `projectTo2DLines(sceneId, cameraJson, hlrJson?)`
+- `projectCurrentTo2DLines(cameraJson, hlrJson?)`
+
+### Current scene shortcuts
+
+If you have already selected a current scene with `setCurrentScene(...)`, you can omit the scene ID:
+
+- `projectCurrentTo2DCamera(cameraJson, hlrJson?)`
+- `projectCurrentTo2DLines(cameraJson, hlrJson?)`
+
+## Camera JSON
+
+Camera payloads are passed as JSON strings and follow the kernel `CameraParameters` shape:
+
+```ts
+const cameraJson = JSON.stringify({
+  position: { x: 8, y: 6, z: 8 },
+  target: { x: 0, y: 0, z: 0 },
+  up: { x: 0, y: 1, z: 0 },
+  near: 0.1,
+  projection_mode: "Orthographic",
+});
+```
+
+Supported `projection_mode` values:
+
+- `"Orthographic"`
+- `"Perspective"`
+
+## Hidden line removal JSON
+
+Hidden line removal options are also passed as JSON:
+
+```ts
+const hlrJson = JSON.stringify({
+  hide_hidden_edges: true,
+});
+```
+
+When `hide_hidden_edges` is `false`, projection behaves more like a wireframe export.
+
+## Example
+
+### Project wrapper geometry to 2D
+
+```ts
+import { Cuboid, OGSceneManager, OpenGeometry, Vector3 } from "opengeometry";
+
+await OpenGeometry.create({ wasmURL: "/opengeometry_bg.wasm" });
+
+function toBrepSerialized(source: unknown) {
+  const value =
+    source && typeof (source as { getBrepSerialized?: () => string }).getBrepSerialized === "function"
+      ? (source as { getBrepSerialized: () => string }).getBrepSerialized()
+      : source && typeof (source as { getBrepData?: () => unknown }).getBrepData === "function"
+        ? (source as { getBrepData: () => unknown }).getBrepData()
+        : source && typeof (source as { getBrep?: () => unknown }).getBrep === "function"
+          ? (source as { getBrep: () => unknown }).getBrep()
+          : source;
+
+  return typeof value === "string" ? value : JSON.stringify(value);
+}
+
+const manager = new OGSceneManager();
+const sceneId = manager.createScene("projection demo");
+
+const cuboid = new Cuboid({
+  center: new Vector3(0, 1.5, 0),
+  width: 5,
+  height: 3,
+  depth: 2,
+  color: 0x10b981,
+});
+
+manager.addBrepEntityToScene(sceneId, "box-1", "Cuboid", toBrepSerialized(cuboid));
+
+const cameraJson = JSON.stringify({
+  position: { x: 8, y: 6, z: 8 },
+  target: { x: 0, y: 0, z: 0 },
+  up: { x: 0, y: 1, z: 0 },
+  near: 0.1,
+  projection_mode: "Orthographic",
+});
+
+const hlrJson = JSON.stringify({
+  hide_hidden_edges: true,
+});
+
+const scene2d = JSON.parse(manager.projectTo2DCamera(sceneId, cameraJson, hlrJson));
+console.log(scene2d.paths.length);
+```
+
+## Output shapes
+
+### Scene2D
+
+`projectTo2DCamera(...)` returns a JSON string for a grouped path payload:
+
+- `name?: string`
+- `paths: Path2D[]`
+
+Each `Path2D` contains `segments` plus optional stroke styling.
+
+### Scene2DLines
+
+`projectTo2DLines(...)` returns a JSON string for a flat line list:
+
+- `name?: string`
+- `lines: Line2D[]`
+
+This form is often easier to post-process for custom exporters.
+
+## Projection behavior
+
+- Orthographic views are the best fit for technical drawings.
+- Perspective views are useful when you want a presentation-style outline projection.
+- Hidden line removal works from the stored B-Rep topology, not from rendered triangle meshes.
+- Large scenes are typically easier to manage by storing named entities in `OGSceneManager` first.
+
+## Related
+
+- [Scene Management](/api/scene/scene-management)
+- [PDF export](/api/export/pdf)
+- [Exports](/concepts/exports)
+
+## Live demo
+
+There is no dedicated projection demo page yet. Start from the demo index:
+[OpenGeometry demos](https://demo.opengeometry.io/).

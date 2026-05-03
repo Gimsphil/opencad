@@ -1,0 +1,202 @@
+---
+title: Arc
+description: A circular arc primitive defined by center, radius, and angle range
+icon: 'circle-notch'
+---
+
+## Overview
+
+`Arc` creates a line-based circular arc or full circle on the XZ plane. It supports segment
+control, optional wide-line rendering, placement helpers, freeform conversion, and a parsed BRep
+accessor.
+
+<Note>
+  Initialize `OpenGeometry.create(...)` before constructing `Vector3` or running the examples on
+  this page.
+</Note>
+
+## Constructor
+
+<Tabs>
+  <Tab title="Rust">
+    ```rust
+    let arc = OGArc::new("arc-1".to_string());
+    ```
+  </Tab>
+  <Tab title="TypeScript">
+    ```ts
+    const arc = new Arc(options?: IArcOptions);
+    ```
+  </Tab>
+</Tabs>
+
+### IArcOptions
+
+<ParamField path="ogid" type="string" optional>
+  Unique identifier for the arc. Auto-generated when omitted.
+</ParamField>
+
+<ParamField path="center" type="Vector3" required>
+  Center point of the arc.
+</ParamField>
+
+<ParamField path="radius" type="number" required>
+  Arc radius.
+</ParamField>
+
+<ParamField path="startAngle" type="number" required>
+  Start angle in radians.
+</ParamField>
+
+<ParamField path="endAngle" type="number" required>
+  End angle in radians.
+</ParamField>
+
+<ParamField path="segments" type="number" required>
+  Number of segments used to approximate the arc.
+</ParamField>
+
+<ParamField path="color" type="number" required>
+  Arc color as a hex number.
+</ParamField>
+
+<ParamField path="fatLines" type="boolean" default="false">
+  Enables wide-line rendering with `Line2`.
+</ParamField>
+
+<ParamField path="width" type="number" default="20">
+  Wide-line width used when `fatLines` is enabled.
+</ParamField>
+
+<ParamField path="translation" type="Vector3" optional>
+  Initial placement translation.
+</ParamField>
+
+<ParamField path="rotation" type="Vector3" optional>
+  Initial placement rotation in radians.
+</ParamField>
+
+<ParamField path="scale" type="Vector3" optional>
+  Initial placement scale.
+</ParamField>
+
+## Methods
+
+### setConfig()
+
+Updates arc geometry or render style.
+
+```ts
+arc.setConfig(options: ArcConfigUpdate): void
+```
+
+### getConfig(), getPlacement()
+
+Returns the current arc config or cloned placement values.
+
+```ts
+const config = arc.getConfig();
+const placement = arc.getPlacement();
+```
+
+### getAnchor()
+
+Returns the current kernel anchor.
+
+```ts
+const anchor = arc.getAnchor();
+```
+
+### setPlacement(), setTransform(), setTranslation(), setRotation(), setScale()
+
+Placement helpers for moving the arc through the kernel transform path.
+
+```ts
+arc.setPlacement({ translation?, rotation?, scale? });
+```
+
+### toFreeform()
+
+Converts the arc into a freeform geometry wrapper.
+
+```ts
+const freeform = arc.toFreeform(id?);
+```
+
+### getBrep()
+
+Returns the parsed BRep object for the current arc.
+
+```ts
+const brep = arc.getBrep();
+```
+
+### discardGeometry()
+
+Disposes the current Three.js geometry buffer.
+
+```ts
+arc.discardGeometry(): void
+```
+
+## Properties
+
+<ResponseField name="ogid" type="string">
+  Stable identifier for the arc wrapper.
+</ResponseField>
+
+<ResponseField name="options" type="IArcOptions">
+  Current arc configuration and placement state.
+</ResponseField>
+
+<ResponseField name="color" type="number">
+  Gets or sets the arc color.
+</ResponseField>
+
+## Examples
+
+### Create an open arc
+
+```ts
+import { Arc, Vector3 } from "opengeometry";
+
+const arc = new Arc({
+  center: new Vector3(0, 0, 0),
+  radius: 2.2,
+  startAngle: 0,
+  endAngle: Math.PI * 1.5,
+  segments: 64,
+  color: 0x2563eb,
+});
+```
+
+### Create a full circle
+
+```ts
+const circle = new Arc({
+  center: new Vector3(0, 0, 0),
+  radius: 1.8,
+  startAngle: 0,
+  endAngle: 2 * Math.PI,
+  segments: 96,
+  color: 0x0f172a,
+  fatLines: true,
+  width: 10,
+});
+```
+
+### Reconfigure the arc
+
+```ts
+arc.setConfig({
+  radius: 2.8,
+  endAngle: Math.PI,
+  color: 0xf97316,
+});
+
+arc.setTranslation(new Vector3(0, 0.25, 0));
+```
+
+## Live demo
+
+- [Arc demo](https://demo.opengeometry.io/primitives/arc.html)

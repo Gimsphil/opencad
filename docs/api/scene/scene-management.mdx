@@ -1,0 +1,170 @@
+---
+title: Scene Management
+description: Manage named scene collections and export/project them through OGSceneManager
+---
+
+## Overview
+
+`OGSceneManager` stores named scene collections inside the wasm layer and exposes scene-level
+projection and export APIs. In browser CAD and AEC/BIM applications, you typically use wrapper
+shapes to generate BRep payloads, then add those payloads to a scene through `OGSceneManager`.
+
+<Note>
+Initialize the runtime once before using `OGSceneManager`:
+
+```ts
+import { OpenGeometry } from "opengeometry";
+
+await OpenGeometry.create({ wasmURL: "/opengeometry_bg.wasm" });
+```
+</Note>
+
+## Core scene operations
+
+### createScene()
+
+Creates a new scene and returns its ID.
+
+```ts
+const sceneId = manager.createScene("Project Name");
+```
+
+### removeScene()
+
+Removes a scene by ID.
+
+```ts
+const removed = manager.removeScene(sceneId);
+```
+
+### setCurrentScene()
+
+Sets the current scene for APIs that operate without an explicit scene ID.
+
+```ts
+manager.setCurrentScene(sceneId);
+```
+
+### listScenes()
+
+Returns a JSON array of scene summaries.
+
+```ts
+const scenes = JSON.parse(manager.listScenes());
+```
+
+## Adding wrapper geometry
+
+For wrapper shapes, add serialized BRep payloads with `addBrepEntityToScene(...)` or
+`addBrepEntityToCurrentScene(...)`.
+
+```ts
+import { Cuboid, OGSceneManager, Sphere, Vector3 } from "opengeometry";
+
+function toBrepSerialized(source: unknown) {
+  const value =
+    source && typeof (source as { getBrepSerialized?: () => string }).getBrepSerialized === "function"
+      ? (source as { getBrepSerialized: () => string }).getBrepSerialized()
+      : source && typeof (source as { getBrepData?: () => unknown }).getBrepData === "function"
+        ? (source as { getBrepData: () => unknown }).getBrepData()
+        : source && typeof (source as { getBrep?: () => unknown }).getBrep === "function"
+          ? (source as { getBrep: () => unknown }).getBrep()
+          : source;
+
+  return typeof value === "string" ? value : JSON.stringify(value);
+}
+
+const manager = new OGSceneManager();
+const sceneId = manager.createScene("Architecture Model");
+
+const cuboid = new Cuboid({
+  center: new Vector3(0, 0.5, 0),
+  width: 10,
+  height: 5,
+  depth: 3,
+  color: 0x9ca3af,
+});
+
+const sphere = new Sphere({
+  center: new Vector3(0, 2.5, 0),
+  radius: 2.5,
+  widthSegments: 32,
+  heightSegments: 24,
+  color: 0x0ea5e9,
+});
+
+manager.addBrepEntityToScene(sceneId, "cuboid-1", "Cuboid", toBrepSerialized(cuboid));
+manager.addBrepEntityToScene(sceneId, "sphere-1", "Sphere", toBrepSerialized(sphere));
+```
+
+### addBrepEntityToCurrentScene()
+
+Adds a serialized BRep payload to the current scene.
+
+```ts
+manager.addBrepEntityToCurrentScene("opening-1", "Opening", toBrepSerialized(opening));
+```
+
+### removeEntityFromScene()
+
+Removes a scene entity by ID.
+
+```ts
+const removed = manager.removeEntityFromScene(sceneId, "cuboid-1");
+```
+
+## Projection helpers
+
+`OGSceneManager` exposes projection helpers that turn stored scene geometry into 2D JSON payloads.
+
+```ts
+const cameraJson = JSON.stringify({
+  position: { x: 8, y: 6, z: 8 },
+  target: { x: 0, y: 0, z: 0 },
+  up: { x: 0, y: 1, z: 0 },
+  near: 0.1,
+  projection_mode: "Orthographic",
+});
+
+const hlrJson = JSON.stringify({
+  hide_hidden_edges: true,
+});
+
+const scene2dJson = manager.projectTo2DCamera(sceneId, cameraJson, hlrJson);
+const scene2d = JSON.parse(scene2dJson);
+```
+
+Related helpers include:
+
+- `projectTo2DCameraPretty(...)`
+- `projectTo2DLines(...)`
+- `projectTo2DLinesPretty(...)`
+- `projectCurrentTo2DCamera(...)`
+- `projectCurrentTo2DLines(...)`
+
+## Export helpers
+
+The same scene storage model is used for scene-level export APIs such as:
+
+- `exportSceneToStl(...)`
+- `exportSceneToStep(...)`
+- `exportSceneToIfc(...)`
+- `exportCurrentSceneToStl(...)`
+- `exportCurrentSceneToStep(...)`
+- `exportCurrentSceneToIfc(...)`
+
+See the export pages for result formats and config JSON shapes.
+
+## Notes
+
+- Scene entities are stored as named BRep payloads, not as live Three.js object references.
+- `kind` is an app-facing label. It can match the wrapper type, but it does not need to.
+- For wrapper-first apps, `OGSceneManager` is most useful when you need projection, export, or
+  long-lived scene snapshots inside the wasm layer.
+
+## Related reading
+
+- [Projection & hidden line removal](/api/export/projection)
+- [STL export](/api/export/stl)
+- [STEP export](/api/export/step)
+- [IFC export](/api/export/ifc)

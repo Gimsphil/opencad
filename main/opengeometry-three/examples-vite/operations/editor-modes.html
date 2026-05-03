@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>OpenGeometry Parametric and Freeform Example</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Simple OpenGeometry parametric to freeform example for Three.js."
+    />
+    <meta name="author" content="Vishwajeet Mane" />
+  </head>
+  <body class="og-example-page">
+    <div class="og-badge-title-card">
+      <a href="../index.html" class="og-badge-title-link">Back</a>
+      <span class="og-badge-title">Parametric and Freeform</span>
+    </div>
+
+    <aside class="og-controls">
+      <h3>Guided Flow</h3>
+      <p class="og-control-summary">
+        Start with the blue parametric cuboid. Resize it, convert it to a freeform copy, then
+        push-pull the top face on the orange copy.
+      </p>
+
+      <div class="og-control-row">
+        <div class="og-control-header">
+          <span class="og-control-label-chip">Status</span>
+          <code class="og-control-value" data-status>ready</code>
+        </div>
+        <p class="og-control-summary" data-summary>
+          Click the buttons from top to bottom. The parametric cuboid stays on the left and the
+          freeform copy appears on the right.
+        </p>
+      </div>
+
+      <button class="og-control-action og-control-action-cyan" data-action="resize">
+        Resize Parametric Cuboid
+      </button>
+      <button class="og-control-action og-control-action-amber" data-action="convert">
+        Convert to Freeform
+      </button>
+      <button class="og-control-action og-control-action-amber" data-action="push-pull" disabled>
+        Push-Pull Top Face
+      </button>
+      <button class="og-control-action og-control-action-rose" data-action="reset">
+        Reset Demo
+      </button>
+    </aside>
+
+    <div id="app"></div>
+
+    <script type="module">
+      import "../src/styles/theme.css";
+      import * as THREE from "three";
+      import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+      import Stats from "three/examples/jsm/libs/stats.module.js";
+      import wasmUrl from "../../../opengeometry/pkg/opengeometry_bg.wasm?url";
+      import {
+        createFreeformEditor,
+        Cuboid,
+        OpenGeometry,
+        Solid,
+        Vector3,
+      } from "opengeometry";
+
+      const app = document.getElementById("app");
+      const statusNode = document.querySelector("[data-status]");
+      const summaryNode = document.querySelector("[data-summary]");
+      const resizeButton = document.querySelector('[data-action="resize"]');
+      const convertButton = document.querySelector('[data-action="convert"]');
+      const pushPullButton = document.querySelector('[data-action="push-pull"]');
+      const resetButton = document.querySelector('[data-action="reset"]');
+
+      if (
+        !app ||
+        !statusNode ||
+        !summaryNode ||
+        !resizeButton ||
+        !convertButton ||
+        !pushPullButton ||
+        !resetButton
+      ) {
+        throw new Error("Missing parametric/freeform example nodes");
+      }
+
+      let scene = null;
+      let cuboid = null;
+      let freeform = null;
+      let freeformEditor = null;
+      let freeformPreview = null;
+      let parametricEdited = false;
+      let pushPullCount = 0;
+
+      function mountStats() {
+        const stats = new Stats();
+        stats.showPanel(0);
+        stats.dom.style.position = "fixed";
+        stats.dom.style.left = "12px";
+        stats.dom.style.bottom = "12px";
+        stats.dom.style.top = "auto";
+        stats.dom.style.zIndex = "1000";
+        document.body.appendChild(stats.dom);
+        return stats;
+      }
+
+      function setStatus(status, summary) {
+        statusNode.textContent = status;
+        summaryNode.textContent = summary;
+      }
+
+      function disposeObject(object) {
+        object.traverse((child) => {
+          child.geometry?.dispose?.();
+          if (Array.isArray(child.material)) {
+            child.material.forEach((material) => material?.dispose?.());
+            return;
+          }
+          child.material?.dispose?.();
+        });
+      }
+
+      function resetCuboidState() {
+        cuboid.setConfig({
+          center: new Vector3(0, 0.75, 0),
+          width: 1.4,
+          height: 1.5,
+          depth: 1.1,
+          color: 0x2563eb,
+          outlineWidth: 2,
+        });
+        cuboid.setPlacement({
+          translation: new Vector3(-2.5, 0, 0),
+          rotation: new Vector3(0, 0, 0),
+          scale: new Vector3(1, 1, 1),
+        });
+        cuboid.outline = true;
+        parametricEdited = false;
+      }
+
+      function rebuildFreeformPreview() {
+        if (!scene) {
+          return;
+        }
+
+        if (freeformPreview) {
+          scene.remove(freeformPreview);
+          disposeObject(freeformPreview);
+          freeformPreview = null;
+        }
+
+        if (!freeform) {
+          pushPullButton.disabled = true;
+          return;
+        }
+
+        freeformPreview = new Solid({
+          brep: freeform,
+          color: 0xf97316,
+          outlineWidth: 2,
+          translation: new Vector3(2.7, 0, 0),
+        });
+        freeformPreview.outline = true;
+        scene.add(freeformPreview);
+        pushPullButton.disabled = false;
+      }
+
+      function findTopFaceId(editor) {
+        let bestFaceId = null;
+        let bestY = Number.NEGATIVE_INFINITY;
+
+        for (const face of editor.getTopologyRenderData().faces) {
+          const info = editor.getFaceInfo(face.face_id);
+          if (info.centroid.y > bestY) {
+            bestY = info.centroid.y;
+            bestFaceId = face.face_id;
+          }
+        }
+
+        return bestFaceId;
+      }
+
+      function resizeParametricCuboid() {
+        cuboid.setConfig({
+          center: new Vector3(0, 0.95, 0),
+          width: 1.9,
+          height: 1.9,
+          depth: 1.25,
+          color: 0x2563eb,
+          outlineWidth: 2,
+        });
+        cuboid.setPlacement({
+          translation: new Vector3(-2.5, 0, 0),
+          rotation: new Vector3(0, Math.PI / 7, 0),
+          scale: new Vector3(1, 1, 1),
+        });
+        cuboid.outline = true;
+        parametricEdited = true;
+
+        console.groupCollapsed("[editor-modes] parametric edit");
+        console.log("Cuboid config", cuboid.getConfig());
+        console.log("Placement", cuboid.getPlacement());
+        console.groupEnd();
+
+        setStatus(
+          "parametric",
+          "The blue cuboid was edited through its normal config and placement API. Convert it now if you want direct face editing."
+        );
+      }
+
+      function convertToFreeform() {
+        freeform = cuboid.toFreeform(`${cuboid.ogid}-freeform`);
+        freeformEditor = createFreeformEditor(freeform);
+        pushPullCount = 0;
+        rebuildFreeformPreview();
+
+        console.groupCollapsed("[editor-modes] converted");
+        console.log("Parametric edited", parametricEdited);
+        console.log("Freeform id", freeform.getId());
+        console.groupEnd();
+
+        setStatus(
+          "converted",
+          "The orange freeform copy was created from the current cuboid state. The blue cuboid is still parametric."
+        );
+      }
+
+      function pushPullTopFace() {
+        if (!freeformEditor) {
+          return;
+        }
+
+        const faceId = findTopFaceId(freeformEditor);
+        if (faceId === null) {
+          setStatus("error", "Could not find a top face on the freeform copy.");
+          return;
+        }
+
+        const result = freeformEditor.pushPullFace(faceId, 0.35, {
+          includeTopologyRemap: true,
+          includeDeltas: true,
+        });
+        pushPullCount += 1;
+        rebuildFreeformPreview();
+
+        console.groupCollapsed("[editor-modes] push-pull");
+        console.log("Face", faceId);
+        console.log("Result", result);
+        console.groupEnd();
+
+        setStatus(
+          result.validity.ok ? "freeform" : "failed",
+          result.validity.ok
+            ? `Push-pull #${pushPullCount} changed the freeform copy. Check the console for the topology report.`
+            : (result.validity.diagnostics[0]?.message ?? "Push-pull failed.")
+        );
+      }
+
+      function resetDemo() {
+        resetCuboidState();
+        freeform = null;
+        freeformEditor = null;
+        pushPullCount = 0;
+        rebuildFreeformPreview();
+        setStatus(
+          "ready",
+          "Click the buttons from top to bottom. The parametric cuboid stays on the left and the freeform copy appears on the right."
+        );
+      }
+
+      async function main() {
+        scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xeef2ff);
+
+        const camera = new THREE.PerspectiveCamera(
+          55,
+          window.innerWidth / window.innerHeight,
+          0.1,
+          100
+        );
+        camera.position.set(9.2, 5.5, 10.5);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        app.replaceChildren(renderer.domElement);
+
+        const stats = mountStats();
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.target.set(0, 1.3, 0);
+        controls.update();
+
+        scene.add(new THREE.GridHelper(28, 28, 0x4460ff, 0xd5ddff));
+        scene.add(new THREE.AmbientLight(0xffffff, 0.82));
+
+        const light = new THREE.DirectionalLight(0xffffff, 1.15);
+        light.position.set(7, 9, 5);
+        scene.add(light);
+
+        await OpenGeometry.create({ wasmURL: wasmUrl });
+
+        cuboid = new Cuboid({
+          center: new Vector3(0, 0.75, 0),
+          width: 1.4,
+          height: 1.5,
+          depth: 1.1,
+          color: 0x2563eb,
+          outlineWidth: 2,
+        });
+        scene.add(cuboid);
+
+        resizeButton.addEventListener("click", resizeParametricCuboid);
+        convertButton.addEventListener("click", convertToFreeform);
+        pushPullButton.addEventListener("click", pushPullTopFace);
+        resetButton.addEventListener("click", resetDemo);
+
+        resetDemo();
+
+        renderer.setAnimationLoop(() => {
+          stats.update();
+          controls.update();
+          renderer.render(scene, camera);
+        });
+
+        window.addEventListener("resize", () => {
+          camera.aspect = window.innerWidth / window.innerHeight;
+          camera.updateProjectionMatrix();
+          renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+      }
+
+      void main();
+    </script>
+  </body>
+</html>

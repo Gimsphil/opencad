@@ -1,0 +1,226 @@
+---
+title: 'Cuboid'
+description: 'Create box-shaped solids with configurable dimensions, placement, outlines, and booleans'
+icon: 'cube'
+---
+
+## Overview
+
+`Cuboid` is the box-shaped solid wrapper in the Three.js API. It renders as a `THREE.Mesh`,
+supports kernel-backed placement, outline rendering, freeform conversion, parsed BRep access, and
+boolean subtraction.
+
+<Note>
+  Initialize `OpenGeometry.create(...)` before constructing `Vector3` or running the examples on
+  this page.
+</Note>
+
+## Constructor
+
+```ts
+const cuboid = new Cuboid(options?: ICuboidOptions);
+```
+
+### ICuboidOptions
+
+<ParamField path="ogid" type="string" optional>
+  Unique identifier for the cuboid. Auto-generated when omitted.
+</ParamField>
+
+<ParamField path="center" type="Vector3" required>
+  Center point of the cuboid.
+</ParamField>
+
+<ParamField path="width" type="number" required>
+  Width along the X axis.
+</ParamField>
+
+<ParamField path="height" type="number" required>
+  Height along the Y axis.
+</ParamField>
+
+<ParamField path="depth" type="number" required>
+  Depth along the Z axis.
+</ParamField>
+
+<ParamField path="color" type="number" required>
+  Mesh color as a hex number.
+</ParamField>
+
+<ParamField path="fatOutlines" type="boolean" default="false">
+  Enables wide outline rendering with `LineSegments2`.
+</ParamField>
+
+<ParamField path="outlineWidth" type="number" default="1">
+  Outline width used when `fatOutlines` is enabled.
+</ParamField>
+
+<ParamField path="translation" type="Vector3" optional>
+  Initial placement translation.
+</ParamField>
+
+<ParamField path="rotation" type="Vector3" optional>
+  Initial placement rotation in radians.
+</ParamField>
+
+<ParamField path="scale" type="Vector3" optional>
+  Initial placement scale.
+</ParamField>
+
+## Methods
+
+### setConfig(), getConfig()
+
+Updates or reads the current cuboid config.
+
+```ts
+cuboid.setConfig(options: CuboidConfigUpdate): void
+const config = cuboid.getConfig();
+```
+
+### getPlacement(), getAnchor()
+
+Returns cloned placement values or the current kernel anchor.
+
+```ts
+const placement = cuboid.getPlacement();
+const anchor = cuboid.getAnchor();
+```
+
+### setPlacement(), setTransform(), setTranslation(), setRotation(), setScale()
+
+Placement helpers for moving the cuboid through the kernel transform path.
+
+```ts
+cuboid.setPlacement({ translation?, rotation?, scale? });
+```
+
+### toFreeform()
+
+Converts the cuboid into a freeform geometry wrapper.
+
+```ts
+const freeform = cuboid.toFreeform(id?);
+```
+
+### getBrepData()
+
+Returns the parsed BRep object for the current cuboid.
+
+```ts
+const brep = cuboid.getBrepData();
+```
+
+### subtract()
+
+Subtracts one or more boolean operands from the cuboid and returns a renderable boolean result.
+
+```ts
+const result = cuboid.subtract([operand], options?);
+```
+
+### generateGeometry(), discardGeometry()
+
+Rebuilds or disposes the current Three.js geometry.
+
+```ts
+cuboid.generateGeometry(): void
+cuboid.discardGeometry(): void
+```
+
+## Properties
+
+<ResponseField name="ogid" type="string">
+  Stable identifier for the cuboid wrapper.
+</ResponseField>
+
+<ResponseField name="options" type="ICuboidOptions">
+  Current cuboid configuration and placement state.
+</ResponseField>
+
+<ResponseField name="width" type="number">
+  Sets the cuboid width and regenerates geometry.
+</ResponseField>
+
+<ResponseField name="color" type="number">
+  Gets or sets the render color.
+</ResponseField>
+
+<ResponseField name="outline" type="boolean">
+  Enables or disables outline rendering.
+</ResponseField>
+
+<ResponseField name="fatOutlines" type="boolean">
+  Enables or disables wide outlines.
+</ResponseField>
+
+<ResponseField name="outlineWidth" type="number">
+  Outline width used for wide outlines.
+</ResponseField>
+
+## Examples
+
+### Create a wall or block
+
+```ts
+import { Cuboid, Vector3 } from "opengeometry";
+
+const wall = new Cuboid({
+  center: new Vector3(0, 1.5, 0),
+  width: 6,
+  height: 3,
+  depth: 0.3,
+  color: 0x9ca3af,
+  outlineWidth: 2,
+});
+
+wall.outline = true;
+```
+
+### Update dimensions and placement
+
+```ts
+wall.setConfig({
+  width: 7.2,
+  height: 3.2,
+  depth: 0.28,
+});
+
+wall.setPlacement({
+  translation: new Vector3(2, 0, 0),
+  rotation: new Vector3(0, Math.PI / 10, 0),
+  scale: new Vector3(1, 1, 1),
+});
+```
+
+### Subtract an opening
+
+```ts
+import { Cuboid, Opening, Vector3 } from "opengeometry";
+
+const host = new Cuboid({
+  center: new Vector3(0, 1.5, 0),
+  width: 6,
+  height: 3,
+  depth: 0.3,
+  color: 0x9ca3af,
+});
+
+const opening = new Opening({
+  center: new Vector3(0, 1.1, 0),
+  width: 1.2,
+  height: 1.5,
+  depth: 0.45,
+  color: 0xf97316,
+});
+
+const cut = host.subtract([opening], {
+  outline: true,
+  kernel: { mergeCoplanarFaces: true },
+});
+```
+
+## Live demo
+
+- [Cuboid demo](https://demo.opengeometry.io/shapes/cuboid.html)
+- [Cuboid placement demo](https://demo.opengeometry.io/shapes/cuboid-placement.html)

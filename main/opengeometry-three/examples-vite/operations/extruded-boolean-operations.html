@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>OpenGeometry Extruded Boolean Example</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Wall-minus-openings workflow built from polygon.extrude(height) and array-backed solid subtraction."
+    />
+    <meta name="author" content="Vishwajeet Mane" />
+  </head>
+  <body class="og-example-page">
+    <div class="og-badge-title-card">
+      <a href="../index.html" class="og-badge-title-link">Back</a>
+      <span class="og-badge-title">Extruded Boolean Operations</span>
+    </div>
+
+    <aside class="og-controls">
+      <h3>Wall Minus Openings</h3>
+      <p class="og-control-summary">
+        This page shows the production-style flow: build two polygons, call
+        <code>polygon.extrude(height)</code>, then subtract an array of openings from the wall. The
+        boolean result inherits the host wall's material — color, transparency, and side mode —
+        across multi-cutter subtraction.
+      </p>
+
+      <label class="og-control-row" data-control="wall-height">
+        <div class="og-control-header">
+          <span class="og-control-label-chip">Wall Height</span>
+          <code class="og-control-value" data-value>2.8</code>
+        </div>
+        <div class="og-control-range">
+          <input data-range type="range" min="1.5" max="4" step="0.1" value="2.8" />
+          <input data-number type="number" min="1.5" max="4" step="0.1" value="2.8" />
+        </div>
+      </label>
+
+      <label class="og-control-row" data-control="opening-width">
+        <div class="og-control-header">
+          <span class="og-control-label-chip">Opening Width</span>
+          <code class="og-control-value" data-value>1.4</code>
+        </div>
+        <div class="og-control-range">
+          <input data-range type="range" min="0.6" max="2.2" step="0.05" value="1.4" />
+          <input data-number type="number" min="0.6" max="2.2" step="0.05" value="1.4" />
+        </div>
+      </label>
+
+      <label class="og-control-row" data-control="opening-height">
+        <div class="og-control-header">
+          <span class="og-control-label-chip">Opening Height</span>
+          <code class="og-control-value" data-value>1.6</code>
+        </div>
+        <div class="og-control-range">
+          <input data-range type="range" min="0.8" max="2.4" step="0.05" value="1.6" />
+          <input data-number type="number" min="0.8" max="2.4" step="0.05" value="1.6" />
+        </div>
+      </label>
+
+      <label class="og-control-row" data-control="sill">
+        <div class="og-control-header">
+          <span class="og-control-label-chip">Sill Height</span>
+          <code class="og-control-value" data-value>0.55</code>
+        </div>
+        <div class="og-control-range">
+          <input data-range type="range" min="0" max="1.2" step="0.05" value="0.55" />
+          <input data-number type="number" min="0" max="1.2" step="0.05" value="0.55" />
+        </div>
+      </label>
+    </aside>
+
+    <div id="app"></div>
+
+    <script type="module">
+      import "../src/styles/theme.css";
+      import * as THREE from "three";
+      import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+      import Stats from "three/examples/jsm/libs/stats.module.js";
+      import wasmUrl from "../../../opengeometry/pkg/opengeometry_bg.wasm?url";
+      import { OpenGeometry, Polygon, Vector3 } from "opengeometry";
+
+      const app = document.getElementById("app");
+      if (!app) {
+        throw new Error("Missing #app container");
+      }
+
+      const config = {
+        wallHeight: 2.8,
+        openingWidth: 1.4,
+        openingHeight: 1.6,
+        sillHeight: 0.55,
+      };
+
+      let scene = null;
+      let currentGroup = null;
+
+      function formatNumber(value) {
+        return Number(value).toFixed(2).replace(/\.?0+$/, "");
+      }
+
+      function mountStats() {
+        const stats = new Stats();
+        stats.showPanel(0);
+        stats.dom.style.position = "fixed";
+        stats.dom.style.left = "12px";
+        stats.dom.style.bottom = "12px";
+        stats.dom.style.top = "auto";
+        stats.dom.style.zIndex = "1000";
+        document.body.appendChild(stats.dom);
+        return stats;
+      }
+
+      function attachNumberControl(name, onChange) {
+        const row = document.querySelector(`[data-control="${name}"]`);
+        const range = row?.querySelector("[data-range]");
+        const number = row?.querySelector("[data-number]");
+        const value = row?.querySelector("[data-value]");
+
+        if (!row || !range || !number || !value) {
+          throw new Error(`Missing number control: ${name}`);
+        }
+
+        const commit = (nextValue) => {
+          const parsed = Number(nextValue);
+          if (!Number.isFinite(parsed)) {
+            return;
+          }
+
+          range.value = String(parsed);
+          number.value = String(parsed);
+          value.textContent = formatNumber(parsed);
+          onChange(parsed);
+        };
+
+        range.addEventListener("input", () => commit(range.value));
+        number.addEventListener("input", () => commit(number.value));
+        commit(range.value);
+      }
+
+      function disposeObject(object) {
+        object.traverse((child) => {
+          child.geometry?.dispose?.();
+          if (Array.isArray(child.material)) {
+            child.material.forEach((material) => material?.dispose?.());
+            return;
+          }
+          child.material?.dispose?.();
+        });
+      }
+
+      function rebuildExample() {
+        if (!scene) {
+          return;
+        }
+
+        if (currentGroup) {
+          scene.remove(currentGroup);
+          disposeObject(currentGroup);
+        }
+
+        const wallProfile = new Polygon({
+          vertices: [
+            new Vector3(-2.2, 0, -0.18),
+            new Vector3(2.2, 0, -0.18),
+            new Vector3(2.2, 0, 0.18),
+            new Vector3(-2.2, 0, 0.18),
+          ],
+          color: 0xdc2626,
+          outlineWidth: 2,
+        });
+        const openingProfile = new Polygon({
+          vertices: [
+            new Vector3(-config.openingWidth * 0.5, 0, -0.26),
+            new Vector3(config.openingWidth * 0.5, 0, -0.26),
+            new Vector3(config.openingWidth * 0.5, 0, 0.26),
+            new Vector3(-config.openingWidth * 0.5, 0, 0.26),
+          ],
+          color: 0xf97316,
+          outlineWidth: 2,
+        });
+
+        const wall = wallProfile.extrude(config.wallHeight);
+        wall.outline = true;
+        wall.material.transparent = true;
+        wall.material.opacity = 0.6;
+        wall.material.needsUpdate = true;
+
+        const openingOffset = Math.max(
+          0.45,
+          Math.min(1.05, 2.2 - config.openingWidth * 0.5 - 0.15)
+        );
+
+        const leftOpening = openingProfile.extrude(config.openingHeight);
+        leftOpening.outline = true;
+        leftOpening.setPlacement({
+          translation: new Vector3(-openingOffset, config.sillHeight, 0),
+        });
+
+        const rightOpening = openingProfile.extrude(config.openingHeight);
+        rightOpening.outline = true;
+        rightOpening.setPlacement({
+          translation: new Vector3(openingOffset, config.sillHeight, 0),
+        });
+
+        const result = wall.subtract([leftOpening, rightOpening], {
+          outline: true,
+          outlineWidth: 2,
+          kernel: {
+            mergeCoplanarFaces: true,
+          },
+        });
+
+        wall.position.x = -4;
+        leftOpening.position.x = -4;
+        rightOpening.position.x = -4;
+        result.position.x = 4;
+
+        currentGroup = new THREE.Group();
+        currentGroup.add(wall);
+        currentGroup.add(leftOpening);
+        currentGroup.add(rightOpening);
+        currentGroup.add(result);
+        scene.add(currentGroup);
+
+        console.groupCollapsed("[boolean-extruded] rebuilt");
+        console.log("Config", { ...config });
+        console.log("Report", result.report);
+        console.groupEnd();
+      }
+
+      async function main() {
+        scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xeef2ff);
+
+        const camera = new THREE.PerspectiveCamera(
+          55,
+          window.innerWidth / window.innerHeight,
+          0.1,
+          100
+        );
+        camera.position.set(11.5, 6.8, 12.5);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        app.replaceChildren(renderer.domElement);
+
+        const stats = mountStats();
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.target.set(0, 1.6, 0);
+        controls.update();
+
+        scene.add(new THREE.GridHelper(30, 30, 0x4460ff, 0xd5ddff));
+        scene.add(new THREE.AmbientLight(0xffffff, 0.82));
+
+        const light = new THREE.DirectionalLight(0xffffff, 1.15);
+        light.position.set(7, 9, 5);
+        scene.add(light);
+
+        await OpenGeometry.create({ wasmURL: wasmUrl });
+
+        attachNumberControl("wall-height", (value) => {
+          config.wallHeight = value;
+          rebuildExample();
+        });
+        attachNumberControl("opening-width", (value) => {
+          config.openingWidth = value;
+          rebuildExample();
+        });
+        attachNumberControl("opening-height", (value) => {
+          config.openingHeight = value;
+          rebuildExample();
+        });
+        attachNumberControl("sill", (value) => {
+          config.sillHeight = value;
+          rebuildExample();
+        });
+
+        rebuildExample();
+
+        renderer.setAnimationLoop(() => {
+          stats.update();
+          controls.update();
+          renderer.render(scene, camera);
+        });
+
+        window.addEventListener("resize", () => {
+          camera.aspect = window.innerWidth / window.innerHeight;
+          camera.updateProjectionMatrix();
+          renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+      }
+
+      void main();
+    </script>
+  </body>
+</html>

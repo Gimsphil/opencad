@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>OpenGeometry Starter Freeform Editor</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Minimal OpenGeometry starter app that converts a cuboid to freeform and push-pulls one face."
+    />
+  </head>
+  <body class="og-example-page">
+    <div class="og-badge-title-card">
+      <a href="../index.html" class="og-badge-title-link">Back</a>
+      <span class="og-badge-title">Starter Freeform Editor</span>
+    </div>
+
+    <aside class="og-controls">
+      <h3>Freeform</h3>
+      <p class="og-control-summary">
+        The cuboid is converted to freeform on load. Use one button to push-pull the current top face.
+      </p>
+
+      <div class="og-control-row">
+        <div class="og-control-header">
+          <span class="og-control-label-chip">Status</span>
+          <code class="og-control-value" data-status>ready</code>
+        </div>
+      </div>
+
+      <button class="og-control-action og-control-action-amber" data-action="push-pull">
+        Push-Pull Top Face
+      </button>
+    </aside>
+
+    <div id="app"></div>
+
+    <script type="module">
+      import "../src/styles/theme.css";
+      import * as THREE from "three";
+      import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+      import wasmUrl from "../../../opengeometry/pkg/opengeometry_bg.wasm?url";
+      import {
+        createFreeformEditor,
+        Cuboid,
+        OpenGeometry,
+        Solid,
+        Vector3,
+      } from "opengeometry";
+
+      const app = document.getElementById("app");
+      const statusNode = document.querySelector("[data-status]");
+      const pushPullButton = document.querySelector('[data-action="push-pull"]');
+
+      if (!app || !statusNode || !pushPullButton) {
+        throw new Error("Missing freeform starter nodes");
+      }
+
+      let freeform = null;
+      let freeformEditor = null;
+      let preview = null;
+      let scene = null;
+      let pushPullCount = 0;
+
+      function setStatus(value) {
+        statusNode.textContent = value;
+      }
+
+      function disposeObject(object) {
+        object.traverse((child) => {
+          child.geometry?.dispose?.();
+          if (Array.isArray(child.material)) {
+            child.material.forEach((material) => material?.dispose?.());
+            return;
+          }
+          child.material?.dispose?.();
+        });
+      }
+
+      function findTopFaceId(editor) {
+        let bestFaceId = null;
+        let bestY = Number.NEGATIVE_INFINITY;
+
+        for (const face of editor.getTopologyRenderData().faces) {
+          const info = editor.getFaceInfo(face.face_id);
+          if (info.centroid.y > bestY) {
+            bestY = info.centroid.y;
+            bestFaceId = face.face_id;
+          }
+        }
+
+        return bestFaceId;
+      }
+
+      function rebuildPreview() {
+        if (!scene || !freeform) {
+          return;
+        }
+
+        if (preview) {
+          scene.remove(preview);
+          disposeObject(preview);
+        }
+
+        preview = new Solid({
+          brep: freeform,
+          color: 0xf97316,
+          outlineWidth: 2,
+        });
+        preview.outline = true;
+        scene.add(preview);
+      }
+
+      function pushPullTopFace() {
+        if (!freeformEditor) {
+          return;
+        }
+
+        const faceId = findTopFaceId(freeformEditor);
+        if (faceId === null) {
+          setStatus("error");
+          return;
+        }
+
+        const result = freeformEditor.pushPullFace(faceId, 0.35, {
+          includeTopologyRemap: true,
+          includeDeltas: true,
+        });
+
+        if (!result.validity.ok) {
+          setStatus("failed");
+          return;
+        }
+
+        pushPullCount += 1;
+        rebuildPreview();
+        setStatus(`push-pull-${pushPullCount}`);
+      }
+
+      async function main() {
+        scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xeef2ff);
+
+        const camera = new THREE.PerspectiveCamera(
+          55,
+          window.innerWidth / window.innerHeight,
+          0.1,
+          100
+        );
+        camera.position.set(6.5, 4.5, 7.5);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        app.replaceChildren(renderer.domElement);
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.target.set(0, 1.2, 0);
+        controls.update();
+
+        scene.add(new THREE.GridHelper(24, 24, 0x4460ff, 0xd5ddff));
+        scene.add(new THREE.AmbientLight(0xffffff, 0.82));
+
+        const light = new THREE.DirectionalLight(0xffffff, 1.15);
+        light.position.set(7, 9, 5);
+        scene.add(light);
+
+        await OpenGeometry.create({ wasmURL: wasmUrl });
+
+        const cuboid = new Cuboid({
+          center: new Vector3(0, 0.75, 0),
+          width: 1.6,
+          height: 1.5,
+          depth: 1.1,
+          color: 0x2563eb,
+          outlineWidth: 2,
+        });
+        cuboid.setPlacement({
+          rotation: new Vector3(0, Math.PI / 8, 0),
+          scale: new Vector3(1, 1, 1),
+          translation: new Vector3(0, 0, 0),
+        });
+
+        freeform = cuboid.toFreeform(`${cuboid.ogid}-freeform`);
+        freeformEditor = createFreeformEditor(freeform);
+        rebuildPreview();
+
+        pushPullButton.addEventListener("click", pushPullTopFace);
+
+        renderer.setAnimationLoop(() => {
+          controls.update();
+          renderer.render(scene, camera);
+        });
+
+        window.addEventListener("resize", () => {
+          camera.aspect = window.innerWidth / window.innerHeight;
+          camera.updateProjectionMatrix();
+          renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+      }
+
+      void main();
+    </script>
+  </body>
+</html>
