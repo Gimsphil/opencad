@@ -1,6 +1,6 @@
 <p align="center">
-  <a href="https://opengeometry.io?utm_source=github">
-    <img src="https://raw.githubusercontent.com/OpenGeometry-io/.github/main/profile/opengeometryTextLogo.png" alt="Open CAD" />
+  <a href="https://github.com/Gimsphil/opencad">
+    Open CAD Repository
   </a>
 </p>
 
@@ -95,7 +95,7 @@ If you are using ChatGPT, Claude, Gemini, Copilot, or other coding agents on thi
 
 See Open CAD in action — interactive, browser-based demos showcasing the kernel's capabilities:
 
-**demos.opengeometry.io**
+**github.com/Gimsphil/opencad/tree/main/main/opengeometry-three/examples-vite**
 
 Demos include primitives rendering, shape generation, sweep operations, boolean operations, file exports, and more. All running client-side via WebAssembly.
 
@@ -144,7 +144,7 @@ For a complete walkthrough, see the Quick Start guide or clone the quickstart-js
 
 Full API reference, guides, and concepts are available at:
 
-**docs.opengeometry.io**
+**github.com/Gimsphil/opencad/tree/main/docs**
 
 Key pages:
 - Installation
@@ -177,11 +177,51 @@ npm run build-core
 npm run build
 
 # Run the Three.js example app locally
-npm --prefix main/opengeometry-three run dev-example-three
+npm run dev-example-three
+
+# Preview the built example app locally
+npm run preview-example-three
 
 # Run tests
 npm test
 ```
+
+## Online and Local Runtime Modes
+
+Open CAD can be prepared in three practical modes that line up with what we observed in OpenSCAD, openscad.cloud, and opencad.dev.
+
+### 1. Local development
+
+Use the example Vite app when you want a fast local loop with live reload:
+
+```bash
+npm run dev-example-three
+```
+
+This serves the example pages from `main/opengeometry-three/examples-vite/` and keeps the WASM-backed browser runtime local.
+
+### 2. Local preview of production output
+
+Build and preview the static example bundle when you want to verify the hosted shape locally:
+
+```bash
+npm run build-example-three
+npm run preview-example-three
+```
+
+The generated static site lands in `main/opengeometry-three/examples-dist/` and mirrors what a static host should serve.
+
+### 3. Hosted browser deployment
+
+For online delivery, host the built static files and ensure `opengeometry_bg.wasm` is reachable by the browser. The current repo already supports this static-hosted flow through the example build and through downstream apps that call `OpenGeometry.create({ wasmURL })` with a served WASM URL.
+
+### What we adopted from the references
+
+- OpenSCAD reinforces a strong local-first workflow: downloadable builds, explicit docs, and clear modeling/runtime boundaries.
+- openscad.cloud confirms that a WASM-compiled CAD runtime can be exposed directly in the browser as an online editor.
+- opencad.dev shows the value of a browser-first, self-hostable delivery model with a clean distinction between editor UX and runtime engine.
+
+Open CAD remains a browser-native geometry kernel rather than a full editor, but these references support keeping both local and hosted browser execution as first-class paths.
 
 ## Who is this for?
 

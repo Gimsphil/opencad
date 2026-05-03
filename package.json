@@ -8,11 +8,13 @@
   "main": "index.js",
   "scripts": {
     "dev": "vite",
+    "dev-example-three": "npm --prefix main/opengeometry-three run dev-example-three",
     "test": "cargo test --manifest-path main/opengeometry/Cargo.toml && cargo test --examples --manifest-path main/opengeometry/Cargo.toml",
     "lint": "eslint main/opengeometry-three/src/**/*.ts --fix",
     "lint:check": "eslint main/opengeometry-three/src/**/*.ts",
     "build-three": "rollup -c rollup.config.js",
     "build-example-three": "npm --prefix main/opengeometry-three run build-example-three",
+    "preview-example-three": "npm --prefix main/opengeometry-three run preview-example-three",
     "build-core": "cd main/opengeometry && wasm-pack build --target web && cargo build --release",
     "prepare-dist": "node ./scripts/prepare-dist.mjs",
     "copy-wasm": "npm run prepare-dist",
@@ -42,7 +44,7 @@
   "bugs": {
     "url": "https://github.com/Gimsphil/opencad"
   },
-  "homepage": "https://docs.opengeometry.io",
+  "homepage": "https://github.com/Gimsphil/opencad/tree/main/docs",
   "peerDependencies": {
     "three": ">=0.168.0"
   },

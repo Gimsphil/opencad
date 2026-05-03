@@ -55,7 +55,8 @@
             "group": "Integration",
             "pages": [
               "integration/threejs",
-              "integration/examples"
+              "integration/examples",
+              "integration/runtime-modes"
             ]
           }
         ]

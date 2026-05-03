@@ -14,6 +14,10 @@ existing repository folder names for compatibility.
 Use it to keep implementation work aligned with the current product direction,
 runtime constraints, architecture boundaries, and verified repository behavior.
 
+See `knowledge/external-runtime-references.md` for the current distilled takeaways
+from OpenSCAD, openscad.cloud, and opencad.dev when evaluating online and local
+runtime strategy.
+
 When code, workflows, or architectural assumptions change in a meaningful way,
 append an entry to the update log at the end of this file.
 
@@ -195,7 +199,7 @@ The integration layer currently emphasizes:
 
 ## Demo-Site Feature Map
 
-The public demo catalog at `demos.opengeometry.io` currently organizes examples
+The public demo catalog in `main/opengeometry-three/examples-vite/` currently organizes examples
 under three main headings.
 
 ### Primitives demos
@@ -380,8 +384,8 @@ The repository is licensed under MPL-2.0.
 The main public references are:
 
 - repository README
-- `docs.opengeometry.io`
-- demo catalog at `demos.opengeometry.io`
+- `docs/` in this repository
+- demo catalog in `main/opengeometry-three/examples-vite/`
 - quickstart and installation guides
 
 ### AI agent guidance
@@ -1165,3 +1169,14 @@ into a long narrative document.
 - Re-ran repo searches for the removed link targets and human-facing
   `OpenGeometry` wording in the touched surfaces, then validated the repo with
   `npm run build`.
+
+### 2026-05-04
+
+- Added explicit online and local runtime guidance to the public docs so the
+  repository now documents local dev serving, local production preview, and
+  hosted static browser deployment as first-class modes.
+- Added root-level `dev-example-three` and `preview-example-three` scripts so
+  local browser execution is easier to start from the repo root.
+- Recorded distilled runtime references from OpenSCAD, openscad.cloud, and
+  opencad.dev in `knowledge/external-runtime-references.md` and validated the
+  hosted-style example path with `npm run build-example-three`.

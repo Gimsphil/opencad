@@ -1,0 +1,78 @@
+---
+title: Runtime Modes
+description: How to run Open CAD locally, preview production output, and host it online in the browser
+---
+
+## Overview
+
+Open CAD is already structured for both local and hosted browser execution.
+
+The core pattern is stable across all runtime modes:
+
+1. Serve or bundle the JavaScript entrypoint.
+2. Make `opengeometry_bg.wasm` reachable by URL.
+3. Call `await OpenGeometry.create({ wasmURL })` before constructing `Vector3` or wrappers.
+
+This keeps the runtime browser-native while still supporting local development and online deployment.
+
+## Local development
+
+For active development inside this repo, use the example Vite server:
+
+```bash
+npm run dev-example-three
+```
+
+This launches the example application from `main/opengeometry-three/examples-vite/` with live reload.
+
+## Local production preview
+
+To test the hosted shape before deployment, build the static bundle and preview it locally:
+
+```bash
+npm run build-example-three
+npm run preview-example-three
+```
+
+The built files are emitted to `main/opengeometry-three/examples-dist/`.
+
+## Hosted browser deployment
+
+For an online deployment, host the generated static files from `main/opengeometry-three/examples-dist/` or serve your own downstream application bundle plus a reachable WASM asset.
+
+The minimum requirement is that the browser can fetch `opengeometry_bg.wasm` from the URL passed into `OpenGeometry.create(...)`.
+
+```ts
+await OpenGeometry.create({ wasmURL: "/opengeometry_bg.wasm" });
+```
+
+Static hosting is a natural fit here because the kernel already runs in WebAssembly inside the browser.
+
+## Why this direction is sound
+
+Three external references reinforce this runtime model:
+
+- OpenSCAD demonstrates the value of a clear local-first workflow and explicit documentation around modeling/runtime boundaries.
+- openscad.cloud demonstrates that a CAD runtime can be compiled to WASM and exposed directly as a browser editor.
+- opencad.dev demonstrates a browser-first and self-hostable delivery model for CAD tooling.
+
+Open CAD is not copying those products. The relevant takeaway is architectural: keep local development simple, keep hosted browser execution explicit, and keep the runtime boundary centered on WebAssembly plus a served asset URL.
+
+## Current repo support
+
+The current repository already supports the main building blocks needed for both modes:
+
+- Rust kernel compiled to WebAssembly
+- example Vite dev server for local work
+- static example build for hosted delivery
+- explicit `wasmURL` runtime initialization
+- downstream integration through the published `opengeometry` package
+
+## Recommended workflow
+
+For work in this repo, use this order:
+
+1. `npm run build`
+2. `npm run dev-example-three` while iterating
+3. `npm run build-example-three` before deployment handoff
+4. `npm run preview-example-three` to validate the static-hosted shape locally
