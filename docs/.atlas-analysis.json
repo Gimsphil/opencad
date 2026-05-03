@@ -1,7 +1,7 @@
 {
   "projectType": "sdk-library",
-  "projectName": "OpenGeometry",
-  "projectDescription": "A high-performance CAD kernel for the web, providing 2D/3D geometric primitives and CAD operations via WebAssembly.",
+  "projectName": "Open CAD",
+  "projectDescription": "A high-performance browser-native CAD kernel for the web, providing 2D/3D geometric primitives and CAD operations via WebAssembly.",
   "theme": "almond",
   "primaryColor": "#4460FF",
   "lightColor": null,

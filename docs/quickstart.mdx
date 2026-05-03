@@ -1,13 +1,13 @@
 ---
 title: Quickstart
-description: Create your first 3D shape with OpenGeometry in minutes
+description: Create your first 3D shape with Open CAD in minutes
 ---
 
-This guide walks through a minimal OpenGeometry + Three.js setup for browser-based CAD, AEC/BIM, and other geometry-heavy web tools.
+This guide walks through a minimal Open CAD + Three.js setup for browser-based CAD, AEC/BIM, and other geometry-heavy web tools.
 
 ## Prerequisites
 
-Make sure you have completed the [installation](/installation) steps and have both OpenGeometry and Three.js installed.
+Make sure you have completed the [installation](/installation) steps and have both Open CAD and Three.js installed.
 
 ## Basic Setup
 
@@ -25,7 +25,7 @@ First, set up a basic HTML page with a container for your 3D scene:
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>OpenGeometry Quickstart</title>
+  <title>Open CAD Quickstart</title>
   <style>
     body { margin: 0; overflow: hidden; }
     #app { width: 100vw; height: 100vh; }
@@ -92,12 +92,12 @@ scene.add(directionalLight);
 
 </Step>
 
-<Step title="Initialize OpenGeometry">
+<Step title="Initialize Open CAD">
 
-Initialize the OpenGeometry WASM module once before creating shapes:
+Initialize the Open CAD WASM module once before creating shapes:
 
 ```typescript
-// Initialize OpenGeometry
+// Initialize Open CAD
 await OpenGeometry.create({ wasmURL: "/opengeometry_bg.wasm" });
 ```
 
@@ -209,7 +209,7 @@ const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
 directionalLight.position.set(5, 8, 3);
 scene.add(directionalLight);
 
-// Initialize OpenGeometry
+// Initialize Open CAD
 await OpenGeometry.create({ wasmURL: "/opengeometry_bg.wasm" });
 
 // Create a cuboid

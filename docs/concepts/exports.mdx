@@ -1,11 +1,11 @@
 ---
 title: Exports
-description: Export OpenGeometry results to 2D drawings and 3D interchange formats
+description: Export Open CAD results to 2D drawings and 3D interchange formats
 ---
 
 ## Overview
 
-OpenGeometry supports both 2D and 3D export workflows:
+Open CAD supports both 2D and 3D export workflows:
 
 - **2D drawings**: project a 3D B-Rep to 2D lines (optionally with hidden line removal), then export
   as PDF in native builds
@@ -39,7 +39,7 @@ in native builds and are not available in browser/WASM environments.
 
 Scene exports accept an optional `config_json` string:
 
-- If `config_json` is omitted, `null`, `undefined`, or an empty string, OpenGeometry uses defaults.
+- If `config_json` is omitted, `null`, `undefined`, or an empty string, Open CAD uses defaults.
 - If you provide `config_json`, the payload must deserialize into the full config struct. Missing
   required fields cause an error. If you want defaults, omit the config entirely.
 
@@ -57,7 +57,7 @@ or subtraction.
 <Warning>
 Projection/hidden line removal, PDF export, STL export, STEP export, and IFC export are
 experimental. Output and config schemas may change. If you hit an exporter limitation or confusing
-output, reach out on [Discord](https://discord.gg/9wJpbfgGGA).
+output, review the repository examples and exporter docs first.
 </Warning>
 
 ## Related

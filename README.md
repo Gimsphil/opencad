@@ -1,10 +1,10 @@
 <p align="center">
   <a href="https://opengeometry.io?utm_source=github">
-    <img src="https://raw.githubusercontent.com/OpenGeometry-io/.github/main/profile/opengeometryTextLogo.png" alt="OpenGeometry" />
+    <img src="https://raw.githubusercontent.com/OpenGeometry-io/.github/main/profile/opengeometryTextLogo.png" alt="Open CAD" />
   </a>
 </p>
 
-<h1 align="center">OpenGeometry</h1>
+<h1 align="center">Open CAD</h1>
 
 <p align="center">
   <strong>Browser-native CAD kernel for Web Apps and AI CAD built with Rust, WebAssembly, and Three.js.</strong>
@@ -12,33 +12,32 @@
 
 <p align="center">
   <a href="https://www.npmjs.com/package/opengeometry"><img src="https://img.shields.io/npm/v/opengeometry?style=flat-square&color=4460FF&label=npm" alt="npm version" /></a>
-  <a href="https://github.com/OpenGeometry-io/OpenGeometry/blob/main/LICENSE.md"><img src="https://img.shields.io/github/license/opengeometry-io/opengeometry?style=flat-square" alt="License" /></a>
-  <a href="https://discord.gg/9wJpbfgGGA"><img src="https://img.shields.io/badge/Discord-Join%20us-5865F2?style=flat-square&logo=discord&logoColor=white" alt="Discord" /></a>
-  <a href="https://x.com/openGeometry"><img src="https://img.shields.io/badge/Twitter-Follow-1DA1F2?style=flat-square&logo=x&logoColor=white" alt="Twitter" /></a>
-  <a href="https://linkedin.com/company/openGeometry"><img src="https://img.shields.io/badge/LinkedIn-Connect-0A66C2?style=flat-square&logo=linkedin&logoColor=white" alt="LinkedIn" /></a>
+  <a href="https://github.com/Gimsphil/opencad/blob/main/LICENSE.md"><img src="https://img.shields.io/github/license/Gimsphil/opencad?style=flat-square" alt="License" /></a>
 </p>
 
 <p align="center">
-  <a href="https://opengeometry.io?utm_source=github">Website</a> · <a href="https://docs.opengeometry.io/OpenGeometry?utm_source=github">Documentation</a> · <a href="https://demos.opengeometry.io?utm_source=github">Live Demos</a> · <a href="https://blog.opengeometry.io?utm_source=github">Blog</a> · <a href="https://www.npmjs.com/package/opengeometry">npm</a>
+  Website · Documentation · Live Demos · npm
 </p>
 
 ---
 
-> **Actively maintained and growing.** We're building OpenGeometry in the open. APIs, examples, and package structure are evolving, we are actively improving and expanding the project. Star the repo to follow along. If you have questions or want to get involved, join the [Discord](https://discord.com/invite/9wJpbfgGGA) or check out the [issues](https://github.com/OpenGeometry-io/OpenGeometry/issues)
+> **Actively maintained and growing.** We're building Open CAD in the open. APIs, examples, and package structure are evolving, and the project is actively expanding.
 
 ---
 
-## What is OpenGeometry?
+## What is Open CAD?
 
-OpenGeometry is an **open-source, browser-native CAD kernel**. The geometry engine is written in **Rust**, compiled to **WebAssembly**, and paired with a **Three.js-friendly TypeScript layer** so you can build real CAD tools that run in the browser.
+Open CAD is an **open-source, browser-native CAD kernel**. The geometry engine is written in **Rust**, compiled to **WebAssembly**, and paired with a **Three.js-friendly TypeScript layer** so you can build real CAD tools that run in the browser.
 
-OpenGeometry is best suited for **browser-based CAD, AEC/BIM, configurators, and geometry-heavy web tools**. Whether you're building a parametric modeler, a wall/opening workflow, a BIM viewer, or a custom Three.js modeling tool, OpenGeometry gives you deterministic, kernel-backed primitives and operations without leaving JavaScript.
+Open CAD is best suited for **browser-based CAD, AEC/BIM, configurators, and geometry-heavy web tools**. Whether you're building a parametric modeler, a wall/opening workflow, a BIM viewer, or a custom Three.js modeling tool, Open CAD gives you deterministic, kernel-backed primitives and operations without leaving JavaScript.
 
-It is the geometry engine layer, not a full CAD application. OpenPlans is a downstream application/toolkit built on top of OpenGeometry for AEC workflows. In this repository, OpenGeometry is the primary SDK and engine.
+It is the geometry engine layer, not a full CAD application. OpenPlans is a downstream application/toolkit built on top of Open CAD for AEC workflows. In this repository, Open CAD is the primary SDK and engine.
 
-## When to use OpenGeometry
+For compatibility, the published package name and runtime identifiers remain `opengeometry` and `OpenGeometry`.
 
-Use OpenGeometry when you need:
+## When to use Open CAD
+
+Use Open CAD when you need:
 
 - browser-based parametric modeling with Rust + WebAssembly performance
 - wall/opening subtraction and other solid boolean workflows
@@ -49,7 +48,7 @@ Use OpenGeometry when you need:
 
 ## Why it works well for AI-powered CAD apps
 
-OpenGeometry is a good fit for **AI-assisted CAD apps** because the kernel layer stays explicit and deterministic. An AI copilot or agent can suggest modeling steps, generate profiles, or orchestrate edits, while OpenGeometry executes the actual geometry operations, booleans, projections, and exports in a predictable browser runtime.
+Open CAD is a good fit for **AI-assisted CAD apps** because the kernel layer stays explicit and deterministic. An AI copilot or agent can suggest modeling steps, generate profiles, or orchestrate edits, while Open CAD executes the actual geometry operations, booleans, projections, and exports in a predictable browser runtime.
 
 Good examples include:
 
@@ -77,10 +76,10 @@ If you are using ChatGPT, Claude, Gemini, Copilot, or other coding agents on thi
 
 - [AGENTS.md](./AGENTS.md) - single source of truth for all coding agents (architecture, commands, gotchas, behavioral rules)
 - [README.md](./README.md) - product overview, positioning, and quick start
-- [Quickstart](https://docs.opengeometry.io/OpenGeometry/quickstart)
-- [Installation](https://docs.opengeometry.io/OpenGeometry/installation)
-- [Boolean operations](https://docs.opengeometry.io/OpenGeometry/concepts/booleans)
-- [Extrude](https://docs.opengeometry.io/OpenGeometry/api/operations/extrude)
+- Quickstart
+- Installation
+- Boolean operations
+- Extrude
 
 ### What you can do today
 
@@ -94,9 +93,9 @@ If you are using ChatGPT, Claude, Gemini, Copilot, or other coding agents on thi
 
 ## Demos
 
-See OpenGeometry in action — interactive, browser-based demos showcasing the kernel's capabilities:
+See Open CAD in action — interactive, browser-based demos showcasing the kernel's capabilities:
 
-**[demos.opengeometry.io](https://demos.opengeometry.io)**
+**demos.opengeometry.io**
 
 Demos include primitives rendering, shape generation, sweep operations, boolean operations, file exports, and more. All running client-side via WebAssembly.
 
@@ -139,19 +138,19 @@ cuboid.setPlacement({
 
 Scenegraph behavior is snapshot-based: `add*ToScene` captures geometry at insert time. If you change placement/config later, push updates explicitly via `replaceBrepEntityInScene` or `refreshBrepEntityInScene`.
 
-For a complete walkthrough, see the [Quick Start guide](https://docs.opengeometry.io/OpenGeometry/quickstart) or clone the [quickstart-js](https://github.com/OpenGeometry-io/quickstart-js) repo.
+For a complete walkthrough, see the Quick Start guide or clone the quickstart-js repository.
 
 ## Documentation
 
 Full API reference, guides, and concepts are available at:
 
-**[docs.opengeometry.io](https://docs.opengeometry.io)**
+**docs.opengeometry.io**
 
 Key pages:
-- [Installation](https://docs.opengeometry.io/OpenGeometry/installation)
-- [Quick Start](https://docs.opengeometry.io/OpenGeometry/quickstart)
-- [Architecture & Concepts](https://docs.opengeometry.io/OpenGeometry/concepts/architecture)
-- [API Reference](https://docs.opengeometry.io/OpenGeometry/api/)
+- Installation
+- Quick Start
+- Architecture & Concepts
+- API Reference
 
 ## Repository Structure
 
@@ -191,21 +190,21 @@ npm test
 - Contributors interested in the **Rust → WASM geometry pipeline**
 - Anyone exploring **open-source CAD kernel internals**
 
-If you just want a quick look, start with the [hosted demos](https://demos.opengeometry.io) or the [quickstart repo](https://github.com/OpenGeometry-io/quickstart-js).
+If you just want a quick look, start with the hosted demos or the quickstart repository.
 
 ## Community
 
-We'd love to have you involved — whether you're using OpenGeometry, building on it, or just curious.
+We'd love to have you involved — whether you're using Open CAD, building on it, or just curious.
 
-- **[Discord](https://discord.com/invite/9wJpbfgGGA)** — Chat with the team and community
-- **[Twitter / X](https://x.com/openGeometry)** — Updates and announcements
-- **[LinkedIn](https://linkedin.com/company/openGeometry)** — Company updates
-- **[GitHub Issues](https://github.com/OpenGeometry-io/OpenGeometry/issues)** — Bug reports and feature requests
-- **[Blog](https://blog.opengeometry.io?utm_source=github)** — Deep dives and release notes
+- Discord — Chat with the team and community
+- Twitter / X — Updates and announcements
+- LinkedIn — Company updates
+- GitHub Issues — Bug reports and feature requests
+- Blog — Deep dives and release notes
 
 ## Contributing
 
-OpenGeometry is open source under the [MPL-2.0 license](./LICENSE.md). Contributions are welcome — check the [issues](https://github.com/OpenGeometry-io/OpenGeometry/issues) for good starting points or open a discussion on [Discord](https://discord.com/invite/9wJpbfgGGA).
+Open CAD is open source under the [MPL-2.0 license](./LICENSE.md). Contributions are welcome.
 
 ## AI Agent Docs Policy
 

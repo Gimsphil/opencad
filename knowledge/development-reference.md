@@ -1,4 +1,4 @@
-# OpenGeometry Development Reference
+# Open CAD Development Reference
 
 Last updated: 2026-05-04
 Status: Active working reference
@@ -6,6 +6,10 @@ Status: Active working reference
 ## Purpose
 
 This document is the long-lived development reference for work in this repository.
+
+Branding note: the product name in user-facing text is Open CAD, while the
+current technical identifiers remain `opengeometry`, `OpenGeometry`, and the
+existing repository folder names for compatibility.
 
 Use it to keep implementation work aligned with the current product direction,
 runtime constraints, architecture boundaries, and verified repository behavior.
@@ -1149,3 +1153,15 @@ into a long narrative document.
 - Added a session-level execution record summarizing repository intake,
   environment bring-up, validation steps, starter extraction, and the known
   constraints observed during this work.
+
+### 2026-05-04
+
+- Standardized additional user-facing branding across README, AGENTS, Mintlify
+  docs, and example HTML titles/descriptions so the public product wording now
+  reads Open CAD while preserving `opengeometry` and `OpenGeometry` technical
+  identifiers for compatibility.
+- Removed Discord, LinkedIn, blog, and GitHub Issues links from the main public
+  documentation and example surfaces that were explicitly requested for cleanup.
+- Re-ran repo searches for the removed link targets and human-facing
+  `OpenGeometry` wording in the touched surfaces, then validated the repo with
+  `npm run build`.

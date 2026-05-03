@@ -11,7 +11,7 @@ restrictive rule.
 
 ## 1. Project Identity
 
-**OpenGeometry** is a browser-native CAD kernel: geometry logic written in **Rust**,
+**Open CAD** is a browser-native CAD kernel: geometry logic written in **Rust**,
 compiled to **WebAssembly**, wrapped in **TypeScript** for **Three.js** integration.
 Published to NPM as `opengeometry`.
 
@@ -21,7 +21,7 @@ CAD frontends that need deterministic geometry execution.
 **Not the right fit for:** desktop-native CAD, non-browser runtimes without WebAssembly,
 visualization-only apps where raw Three.js suffices.
 
-OpenPlans is a *downstream* application/toolkit built on OpenGeometry. Do not position
+OpenPlans is a *downstream* application/toolkit built on Open CAD. Do not position
 OpenPlans as the SDK itself.
 
 ---

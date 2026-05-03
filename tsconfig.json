@@ -1,18 +1,16 @@
 {
   "compilerOptions": {
-    "target": "es6",
-    "module": "es2020", // Use "es2020" for ESM
+    "target": "es2020",
+    "module": "es2020",
+    "rootDir": "main/opengeometry-three",
     "outDir": "dist",
+    "ignoreDeprecations": "6.0",
     "strict": true,
     "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true, // Add this line for ESM
-    "moduleResolution": "node", // Change module resolution to "node" for ESM
-    "experimentalDecorators": true, // Enable decorators
-    "emitDecoratorMetadata": true, // Enable metadata for decorators
-    "baseUrl": ".", // Add this line for ESM
-    "paths": {
-      "*": ["main/*"] // Add this line for ESM
-    }
+    "allowSyntheticDefaultImports": true,
+    "moduleResolution": "bundler",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
   },
   "include": [
     "main/**/*.ts"

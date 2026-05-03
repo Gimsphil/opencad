@@ -3,7 +3,7 @@
   "author": "Vishwajeet Vinayak Mane",
   "license": "MPL-2.0",
   "version": "2.0.9",
-  "description": "CAD kernel for the web built with Rust, WebAssembly, and Three.js for browser CAD, AEC/BIM, and geometry-heavy tools.",
+  "description": "Open CAD is a browser-native CAD kernel for the web built with Rust, WebAssembly, and Three.js for CAD, AEC/BIM, and geometry-heavy tools.",
   "type": "module",
   "main": "index.js",
   "scripts": {
@@ -20,7 +20,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/OpenGeometry-io/OpenGeometry.git"
+    "url": "git+https://github.com/Gimsphil/opencad.git"
   },
   "keywords": [
     "opengeometry",
@@ -40,7 +40,7 @@
     "parametric-modeling"
   ],
   "bugs": {
-    "url": "https://github.com/OpenGeometry-io/OpenGeometry/issues"
+    "url": "https://github.com/Gimsphil/opencad"
   },
   "homepage": "https://docs.opengeometry.io",
   "peerDependencies": {

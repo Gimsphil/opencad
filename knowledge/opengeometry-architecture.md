@@ -1,4 +1,4 @@
-# OpenGeometry Architecture and Engine Drivers
+# Open CAD Architecture and Engine Drivers
 
 This note documents how the repository is structured and what actually drives geometry generation, scene composition, and projection/export.
 

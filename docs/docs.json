@@ -1,6 +1,6 @@
 {
   "$schema": "https://mintlify.com/docs.json",
-  "name": "OpenGeometry",
+  "name": "Open CAD",
   "theme": "almond",
   "colors": {
     "primary": "#4460FF",
@@ -10,12 +10,12 @@
   "navbar": {
     "primary": {
       "type": "github",
-      "href": "https://github.com/OpenGeometry-io/OpenGeometry"
+      "href": "https://github.com/Gimsphil/opencad"
     }
   },
   "footer": {
     "socials": {
-      "github": "https://github.com/OpenGeometry-io/OpenGeometry"
+      "github": "https://github.com/Gimsphil/opencad"
     }
   },
   "navigation": {
@@ -24,16 +24,6 @@
         "tab": "Documentation",
         "global": {
           "anchors": [
-            {
-              "anchor": "Blog",
-              "href": "https://mintlify.com/blog",
-              "icon": "newspaper"
-            },
-            {
-              "anchor": "Discord",
-              "href": "https://discord.gg/9wJpbfgGGA",
-              "icon": "discord"
-            },
             {
               "anchor": "SDK",
               "href": "https://npmjs.com/org/mintlify",
